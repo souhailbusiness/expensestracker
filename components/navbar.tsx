@@ -9,6 +9,7 @@ import { Wallet } from 'lucide-react';
 export default function Navbar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const { data: session, status } = useSession();
 
   const navItems = [
@@ -59,15 +60,34 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {status === 'authenticated' ? (
             <div className="hidden items-center gap-3 md:flex">
-              <span className="text-sm text-slate-500">
-                {session?.user?.name || session?.user?.email}
-              </span>
-              <button
-                onClick={() => signOut({ callbackUrl: '/auth/login' })}
-                className="text-sm font-semibold text-slate-700 hover:text-slate-900"
-              >
-                Sign out
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="rounded-lg bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-200 transition cursor-pointer"
+                >
+                  {session?.user?.name || session?.user?.email}
+                </button>
+                {showUserMenu && (
+                  <div className="absolute right-0 top-12 mt-2 rounded-lg border border-indigo-200 bg-white shadow-lg z-50 min-w-48">
+                    <Link
+                      href="/dashboard"
+                      className="block px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-indigo-50 transition border-b border-slate-100"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Go to Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        signOut({ callbackUrl: '/auth/login' });
+                      }}
+                      className="w-full px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 transition"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <Link
@@ -123,12 +143,24 @@ export default function Navbar() {
           </div>
           <div className="mt-3 border-t border-slate-200 pt-3">
             {status === 'authenticated' ? (
-              <button
-                onClick={() => signOut({ callbackUrl: '/auth/login' })}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-              >
-                Sign out
-              </button>
+              <div className="space-y-2">
+                <Link
+                  href="/dashboard"
+                  className="block rounded-lg bg-indigo-100 px-3 py-2 text-center text-sm font-semibold text-indigo-700 hover:bg-indigo-200 transition cursor-pointer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    signOut({ callbackUrl: '/auth/login' });
+                  }}
+                  className="w-full rounded-lg border border-red-200 px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50 cursor-pointer"
+                >
+                  Sign out
+                </button>
+              </div>
             ) : (
               <Link
                 href="/auth/login"
@@ -144,3 +176,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

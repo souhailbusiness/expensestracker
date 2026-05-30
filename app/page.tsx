@@ -1,8 +1,4 @@
-'use client';
-
 import Link from 'next/link';
-import { useState } from 'react';
-import { useSession } from 'next-auth/react';
 import {
   BarChart3,
   Lightbulb,
@@ -16,9 +12,6 @@ import {
 } from 'lucide-react';
 
 export default function RootPage() {
-  const { data: session, status } = useSession();
-  const [showDashboardMenu, setShowDashboardMenu] = useState(false);
-
   return (
     <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,#F1F5FD,white_55%)] text-slate-900">
       <div className="pointer-events-none absolute -left-32 top-12 h-72 w-72 rounded-full bg-purple-200/40 blur-3xl" />
@@ -64,35 +57,12 @@ export default function RootPage() {
             </div>
 
             <div className="mt-10 flex flex-wrap items-center gap-6">
-              {status === 'authenticated' ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowDashboardMenu(!showDashboardMenu)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition duration-300 ease-in-out hover:opacity-90"
-                  >
-                    <User className="h-4 w-4" />
-                    {session?.user?.name || session?.user?.email}
-                  </button>
-                  {showDashboardMenu && (
-                    <div className="absolute left-0 top-12 mt-2 rounded-lg border border-indigo-200 bg-white shadow-lg z-50">
-                      <Link
-                        href="/dashboard"
-                        className="block px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-indigo-50 rounded-lg transition"
-                        onClick={() => setShowDashboardMenu(false)}
-                      >
-                        Go to Dashboard
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  href="/auth/register"
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition duration-300 ease-in-out hover:opacity-90 animate-pulse-zoom"
-                >
-                  Get Started →
-                </Link>
-              )}
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition duration-300 ease-in-out hover:opacity-90 animate-pulse-zoom"
+              >
+                Get Started →
+              </Link>
               <Link
                 href="/about"
                 className="text-sm font-semibold text-slate-700 underline decoration-indigo-300 underline-offset-4"
