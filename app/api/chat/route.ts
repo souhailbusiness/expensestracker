@@ -34,23 +34,28 @@ export async function POST(request: NextRequest) {
       role: 'user',
       message: validatedData.message,
     });
+
     await userMessage.save();
 
-    // Get recent chat history and expense data for context
+    // Get recent chat history
     const chatHistory = await ChatHistory.find({ userId })
       .sort({ createdAt: -1 })
       .limit(10)
       .lean();
 
+    // Get recent expenses
     const expenses = await Expense.find({ userId })
       .sort({ date: -1 })
       .limit(20)
       .lean();
 
-    const totalSpent = expenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
+    const totalSpent = expenses.reduce(
+      (sum: number, exp: any) => sum + exp.amount,
+      0
+    );
 
-    // Build context message
-    const systemMessage = `You are a helpful budget assistant. Help users track and analyze their expenses. 
+    const systemMessage = `You are a helpful budget assistant. Help users track and analyze their expenses.
+
 Current spending summary:
 - Total spent this month: $${totalSpent.toFixed(2)}
 - Number of expenses: ${expenses.length}
@@ -64,7 +69,6 @@ ${expenses
 
 Provide helpful budgeting advice and insights.`;
 
-    // Prepare messages for Groq API
     const messages = [
       ...chatHistory
         .reverse()
@@ -88,45 +92,57 @@ Provide helpful budgeting advice and insights.`;
     });
 
     const assistantMessage =
-      completion.content[0].type === 'text' ? completion.content[0].text : '';
+      completion.content?.[0]?.type === 'text'
+        ? completion.content[0].text
+        : '';
 
     // Save assistant response
-    const response = new ChatHistory({
+    const assistantResponse = new ChatHistory({
       userId,
       role: 'assistant',
       message: assistantMessage,
     });
-    await response.save();
 
-    const response = NextResponse.json(
+    await assistantResponse.save();
+
+    const apiResponse = NextResponse.json(
       { message: assistantMessage },
       { status: 200 }
     );
+
     if (isAnonymous && isNewSession && sessionToken) {
-      attachSessionCookie(response, sessionToken);
+      attachSessionCookie(apiResponse, sessionToken);
     }
-    return response;
+
+    return apiResponse;
   } catch (error: any) {
     console.error('[v0] Chat error:', error);
 
     if (error.name === 'ZodError') {
-      const response = NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+      const errorResponse = NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: error.errors,
+        },
         { status: 400 }
       );
+
       if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
+        attachSessionCookie(errorResponse, sessionToken);
       }
-      return response;
+
+      return errorResponse;
     }
 
-    const response = NextResponse.json(
+    const errorResponse = NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
+
     if (isNewSession && sessionToken) {
-      attachSessionCookie(response, sessionToken);
+      attachSessionCookie(errorResponse, sessionToken);
     }
-    return response;
+
+    return errorResponse;
   }
 }
