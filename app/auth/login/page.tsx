@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,20 @@ import { Input } from '@/components/ui/input';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') ?? '/dashboard';
+  const registered = searchParams?.get('registered') === 'true';
+  const { status } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push(callbackUrl);
+    }
+  }, [status, callbackUrl, router]);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -34,12 +44,12 @@ export default function LoginPage() {
       return;
     }
 
-    router.push('/dashboard');
+    router.push(callbackUrl);
   };
 
   const handleGoogle = async () => {
     setIsSubmitting(true);
-    await signIn('google', { callbackUrl: '/dashboard' });
+    await signIn('google', { callbackUrl });
   };
 
   return (
@@ -49,6 +59,12 @@ export default function LoginPage() {
         <p className="text-sm text-gray-600 mb-6">
           Use your email and password, or Google.
         </p>
+
+        {registered && (
+          <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700 mb-4">
+            Account created successfully. Please sign in.
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

@@ -1,20 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { status } = useSession();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/dashboard');
+    }
+  }, [status, router]);
 
   const handleRegister = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -40,19 +47,7 @@ export default function RegisterPage() {
       return;
     }
 
-    const signInResult = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (signInResult?.error) {
-      setErrorMessage('Account created, but sign in failed.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    router.push('/dashboard');
+    router.push('/auth/login?registered=true');
   };
 
   return (
