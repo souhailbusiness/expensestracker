@@ -173,7 +173,7 @@ export default function RootPage() {
                     ))}
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between rounded-2xl bg-white px-6 py-3 text-slate-500">
+                  {/*<div className="mt-6 flex items-center justify-between rounded-2xl bg-white px-6 py-3 text-slate-500">
                     <Home className="h-4 w-4" />
                     <History className="h-4 w-4" />
                     <div className="rounded-full bg-indigo-600 p-2 text-white">
@@ -181,7 +181,7 @@ export default function RootPage() {
                     </div>
                     <Target className="h-4 w-4" />
                     <User className="h-4 w-4" />
-                  </div>
+                  </div>*/}
                 </div>
               </div>
 
