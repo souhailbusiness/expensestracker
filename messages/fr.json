@@ -1,0 +1,124 @@
+{
+  "common": {
+    "appName": "Suivi des Dépenses",
+    "welcome": "Bienvenue",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "currency": "Devise",
+    "language": "Langue"
+  },
+  "auth": {
+    "signUp": "S'inscrire",
+    "signIn": "Se connecter",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "dontHaveAccount": "Vous n'avez pas de compte?",
+    "invalidCredentials": "E-mail ou mot de passe invalide",
+    "userAlreadyExists": "Un utilisateur avec cet e-mail existe déjà",
+    "passwordRequired": "Le mot de passe est requis",
+    "emailRequired": "L'e-mail est requis",
+    "enterPassword": "Entrez votre mot de passe",
+    "enterEmail": "Entrez votre adresse e-mail"
+  },
+  "expenses": {
+    "title": "Dépenses",
+    "addExpense": "Ajouter une dépense",
+    "amount": "Montant",
+    "category": "Catégorie",
+    "description": "Description",
+    "date": "Date",
+    "tags": "Étiquettes",
+    "editExpense": "Modifier la dépense",
+    "deleteExpense": "Supprimer la dépense",
+    "viewExpenses": "Voir les dépenses",
+    "noExpenses": "Aucune dépense trouvée",
+    "food": "Nourriture",
+    "transportation": "Transport",
+    "entertainment": "Divertissement",
+    "shopping": "Magasinage",
+    "utilities": "Services publics",
+    "healthcare": "Santé",
+    "education": "Éducation",
+    "other": "Autre"
+  },
+  "categories": {
+    "title": "Catégories",
+    "addCategory": "Ajouter une catégorie",
+    "budget": "Budget",
+    "spent": "Dépensé",
+    "remaining": "Restant",
+    "color": "Couleur",
+    "manageCategories": "Gérer les catégories",
+    "deleteCategory": "Supprimer la catégorie",
+    "editCategory": "Modifier la catégorie",
+    "noCategoriesFound": "Aucune catégorie trouvée"
+  },
+  "analytics": {
+    "title": "Analytique",
+    "totalSpent": "Total dépensé",
+    "thisMonth": "Ce mois-ci",
+    "lastMonth": "Le mois dernier",
+    "comparison": "Comparaison",
+    "spendingTrends": "Tendances de dépenses",
+    "categoryBreakdown": "Répartition par catégorie",
+    "monthlySpending": "Dépenses mensuelles",
+    "noDataAvailable": "Aucune donnée disponible"
+  },
+  "merchandise": {
+    "title": "Boutique",
+    "availableItems": "Articles disponibles",
+    "price": "Prix",
+    "quantity": "Quantité",
+    "addToCart": "Ajouter au panier",
+    "purchase": "Acheter",
+    "purchaseHistory": "Historique des achats",
+    "noPurchases": "Pas d'achats encore",
+    "outOfStock": "Rupture de stock",
+    "inStock": "En stock"
+  },
+  "ai": {
+    "title": "Assistant Budgétaire",
+    "chatWithAI": "Discutez avec notre assistant budgétaire IA",
+    "sendMessage": "Envoyer",
+    "typeMessage": "Tapez votre message...",
+    "loadingResponse": "Chargement de la réponse...",
+    "emptyChat": "Commencez une conversation avec votre assistant budgétaire"
+  },
+  "profile": {
+    "title": "Profil",
+    "personalInfo": "Informations personnelles",
+    "accountSettings": "Paramètres du compte",
+    "preferences": "Préférences",
+    "updateProfile": "Mettre à jour le profil",
+    "changePassword": "Changer le mot de passe"
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "expenses": "Dépenses",
+    "analytics": "Analytique",
+    "merchandise": "Boutique",
+    "assistant": "Assistant",
+    "profile": "Profil",
+    "settings": "Paramètres"
+  },
+  "errors": {
+    "somethingWentWrong": "Quelque chose s'est mal passé",
+    "tryAgain": "Réessayer",
+    "backHome": "Retour à l'accueil",
+    "pageNotFound": "Page non trouvée",
+    "unauthorized": "Non autorisé"
+  },
+  "success": {
+    "expenseAdded": "Dépense ajoutée avec succès",
+    "expenseUpdated": "Dépense mise à jour avec succès",
+    "expenseDeleted": "Dépense supprimée avec succès",
+    "categoryAdded": "Catégorie ajoutée avec succès",
+    "categoryUpdated": "Catégorie mise à jour avec succès",
+    "categoryDeleted": "Catégorie supprimée avec succès",
+    "purchaseCompleted": "Achat terminé avec succès"
+  }
+}

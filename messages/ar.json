@@ -1,0 +1,124 @@
+{
+  "common": {
+    "appName": "متتبع النفقات",
+    "welcome": "مرحبا",
+    "logout": "تسجيل الخروج",
+    "login": "دخول",
+    "register": "تسجيل",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "currency": "العملة",
+    "language": "اللغة"
+  },
+  "auth": {
+    "signUp": "إنشاء حساب",
+    "signIn": "تسجيل الدخول",
+    "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+    "dontHaveAccount": "ليس لديك حساب؟",
+    "invalidCredentials": "بريد إلكتروني أو كلمة مرور غير صحيحة",
+    "userAlreadyExists": "يوجد مستخدم بهذا البريد الإلكتروني بالفعل",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "enterPassword": "أدخل كلمة المرور الخاصة بك",
+    "enterEmail": "أدخل عنوان بريدك الإلكتروني"
+  },
+  "expenses": {
+    "title": "النفقات",
+    "addExpense": "إضافة نفقة",
+    "amount": "المبلغ",
+    "category": "الفئة",
+    "description": "الوصف",
+    "date": "التاريخ",
+    "tags": "الوسوم",
+    "editExpense": "تعديل النفقة",
+    "deleteExpense": "حذف النفقة",
+    "viewExpenses": "عرض النفقات",
+    "noExpenses": "لم يتم العثور على نفقات",
+    "food": "الغذاء",
+    "transportation": "النقل",
+    "entertainment": "الترفيه",
+    "shopping": "التسوق",
+    "utilities": "المرافق",
+    "healthcare": "الرعاية الصحية",
+    "education": "التعليم",
+    "other": "أخرى"
+  },
+  "categories": {
+    "title": "الفئات",
+    "addCategory": "إضافة فئة",
+    "budget": "الميزانية",
+    "spent": "تم الإنفاق",
+    "remaining": "المتبقي",
+    "color": "اللون",
+    "manageCategories": "إدارة الفئات",
+    "deleteCategory": "حذف الفئة",
+    "editCategory": "تعديل الفئة",
+    "noCategoriesFound": "لم يتم العثور على فئات"
+  },
+  "analytics": {
+    "title": "التحليلات",
+    "totalSpent": "إجمالي الإنفاق",
+    "thisMonth": "هذا الشهر",
+    "lastMonth": "الشهر الماضي",
+    "comparison": "المقارنة",
+    "spendingTrends": "اتجاهات الإنفاق",
+    "categoryBreakdown": "تفصيل الفئة",
+    "monthlySpending": "الإنفاق الشهري",
+    "noDataAvailable": "لا توجد بيانات متاحة"
+  },
+  "merchandise": {
+    "title": "المتجر",
+    "availableItems": "العناصر المتاحة",
+    "price": "السعر",
+    "quantity": "الكمية",
+    "addToCart": "أضف إلى السلة",
+    "purchase": "شراء",
+    "purchaseHistory": "سجل الشراء",
+    "noPurchases": "لم تقم بأي عمليات شراء حتى الآن",
+    "outOfStock": "غير متوفر",
+    "inStock": "متوفر"
+  },
+  "ai": {
+    "title": "مساعد الميزانية",
+    "chatWithAI": "تحدث مع مساعد الميزانية الذكي",
+    "sendMessage": "إرسال",
+    "typeMessage": "اكتب رسالتك...",
+    "loadingResponse": "جاري تحميل الرد...",
+    "emptyChat": "ابدأ محادثة مع مساعد ميزانيتك"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "personalInfo": "معلومات شخصية",
+    "accountSettings": "إعدادات الحساب",
+    "preferences": "التفضيلات",
+    "updateProfile": "تحديث الملف الشخصي",
+    "changePassword": "تغيير كلمة المرور"
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "expenses": "النفقات",
+    "analytics": "التحليلات",
+    "merchandise": "المتجر",
+    "assistant": "المساعد",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات"
+  },
+  "errors": {
+    "somethingWentWrong": "حدث خطأ ما",
+    "tryAgain": "حاول مرة أخرى",
+    "backHome": "العودة إلى الصفحة الرئيسية",
+    "pageNotFound": "الصفحة غير موجودة",
+    "unauthorized": "غير مصرح"
+  },
+  "success": {
+    "expenseAdded": "تمت إضافة النفقة بنجاح",
+    "expenseUpdated": "تم تحديث النفقة بنجاح",
+    "expenseDeleted": "تم حذف النفقة بنجاح",
+    "categoryAdded": "تمت إضافة الفئة بنجاح",
+    "categoryUpdated": "تم تحديث الفئة بنجاح",
+    "categoryDeleted": "تم حذف الفئة بنجاح",
+    "purchaseCompleted": "تم إتمام الشراء بنجاح"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "common": {
+    "appName": "Expense Tracker",
+    "welcome": "Welcome",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "currency": "Currency",
+    "language": "Language"
+  },
+  "auth": {
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "invalidCredentials": "Invalid email or password",
+    "userAlreadyExists": "User with this email already exists",
+    "passwordRequired": "Password is required",
+    "emailRequired": "Email is required",
+    "enterPassword": "Enter your password",
+    "enterEmail": "Enter your email address"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "addExpense": "Add Expense",
+    "amount": "Amount",
+    "category": "Category",
+    "description": "Description",
+    "date": "Date",
+    "tags": "Tags",
+    "editExpense": "Edit Expense",
+    "deleteExpense": "Delete Expense",
+    "viewExpenses": "View Expenses",
+    "noExpenses": "No expenses found",
+    "food": "Food",
+    "transportation": "Transportation",
+    "entertainment": "Entertainment",
+    "shopping": "Shopping",
+    "utilities": "Utilities",
+    "healthcare": "Healthcare",
+    "education": "Education",
+    "other": "Other"
+  },
+  "categories": {
+    "title": "Categories",
+    "addCategory": "Add Category",
+    "budget": "Budget",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "color": "Color",
+    "manageCategories": "Manage Categories",
+    "deleteCategory": "Delete Category",
+    "editCategory": "Edit Category",
+    "noCategoriesFound": "No categories found"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "totalSpent": "Total Spent",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "comparison": "Comparison",
+    "spendingTrends": "Spending Trends",
+    "categoryBreakdown": "Category Breakdown",
+    "monthlySpending": "Monthly Spending",
+    "noDataAvailable": "No data available"
+  },
+  "merchandise": {
+    "title": "Shop",
+    "availableItems": "Available Items",
+    "price": "Price",
+    "quantity": "Quantity",
+    "addToCart": "Add to Cart",
+    "purchase": "Purchase",
+    "purchaseHistory": "Purchase History",
+    "noPurchases": "No purchases yet",
+    "outOfStock": "Out of Stock",
+    "inStock": "In Stock"
+  },
+  "ai": {
+    "title": "Budget Assistant",
+    "chatWithAI": "Chat with our AI Budget Assistant",
+    "sendMessage": "Send Message",
+    "typeMessage": "Type your message...",
+    "loadingResponse": "Loading response...",
+    "emptyChat": "Start a conversation with your budget assistant"
+  },
+  "profile": {
+    "title": "Profile",
+    "personalInfo": "Personal Information",
+    "accountSettings": "Account Settings",
+    "preferences": "Preferences",
+    "updateProfile": "Update Profile",
+    "changePassword": "Change Password"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "expenses": "Expenses",
+    "analytics": "Analytics",
+    "merchandise": "Shop",
+    "assistant": "Assistant",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "errors": {
+    "somethingWentWrong": "Something went wrong",
+    "tryAgain": "Try Again",
+    "backHome": "Back to Home",
+    "pageNotFound": "Page not found",
+    "unauthorized": "Unauthorized"
+  },
+  "success": {
+    "expenseAdded": "Expense added successfully",
+    "expenseUpdated": "Expense updated successfully",
+    "expenseDeleted": "Expense deleted successfully",
+    "categoryAdded": "Category added successfully",
+    "categoryUpdated": "Category updated successfully",
+    "categoryDeleted": "Category deleted successfully",
+    "purchaseCompleted": "Purchase completed successfully"
+  }
+}
