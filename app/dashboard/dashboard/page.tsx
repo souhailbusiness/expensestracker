@@ -390,26 +390,30 @@ export default function DashboardPage() {
   }, [searchQuery, categoryFilter, monthFilter, yearFilter]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="relative min-h-screen bg-[radial-gradient(circle_at_top_left,#F1F5FD,white_55%)] p-4 md:p-8">
+      <div className="pointer-events-none absolute -left-32 top-12 h-72 w-72 rounded-full bg-purple-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute right-0 top-0 h-80 w-80 rounded-full bg-indigo-200/30 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-violet-200/30 blur-3xl" />
+
+      <div className="relative max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-slate-900">
               Expense Tracker
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-slate-600 mt-1">
               Expense Tracker Overview ({currency})
             </p>
           </div>
           <div className="flex gap-4">
             <Link href="/dashboard/expenses">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">
+              <Button className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:opacity-90 text-white cursor-pointer font-semibold">
                 Add Expense
               </Button>
             </Link>
             <Link href="/dashboard/analytics">
-              <Button className="bg-green-600 hover:bg-green-700 text-white cursor-pointer">
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white cursor-pointer font-semibold">
                 Analytics
               </Button>
             </Link>
@@ -418,41 +422,40 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="p-6">
-            <p className="text-gray-600 text-sm">Total Spent</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">
+          <Card className="p-6 bg-white/80 backdrop-blur border-indigo-100 hover:shadow-lg transition">
+            <p className="text-slate-600 text-sm font-semibold">Total Spent</p>
+            <p className="text-3xl font-bold text-indigo-600 mt-2">
               {totalSpent.toFixed(2)} {currency}
             </p>
           </Card>
-          <Card className="p-6">
-            <p className="text-gray-600 text-sm">Transactions</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">
+          <Card className="p-6 bg-white/80 backdrop-blur border-indigo-100 hover:shadow-lg transition">
+            <p className="text-slate-600 text-sm font-semibold">Transactions</p>
+            <p className="text-3xl font-bold text-purple-600 mt-2">
               {filteredExpenses.length}
             </p>
           </Card>
-          <Card className="p-6">
-            <p className="text-gray-600 text-sm">Average Expense</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">
+          <Card className="p-6 bg-white/80 backdrop-blur border-indigo-100 hover:shadow-lg transition">
+            <p className="text-slate-600 text-sm font-semibold">Average Expense</p>
+            <p className="text-3xl font-bold text-blue-600 mt-2">
               {(totalSpent / (filteredExpenses.length || 1)).toFixed(2)} {currency}
             </p>
           </Card>
         </div>
 
         {otherCurrencyCount > 0 && (
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-slate-500 mb-6 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 inline-block">
             {otherCurrencyCount} expenses saved in other currencies are hidden.
           </p>
         )}
 
         {editingId && (
-          <Card className="p-6 mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Edit Expense
+          <Card className="p-6 mb-8 bg-white/80 backdrop-blur border-indigo-100">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">
             </h2>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Category
                   </label>
                   <Select
@@ -474,7 +477,7 @@ export default function DashboardPage() {
                       }));
                     }}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full border-indigo-200 focus:border-indigo-500">
                       <SelectValue placeholder="Pick a category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -493,7 +496,7 @@ export default function DashboardPage() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Item
                   </label>
                   <Input
@@ -503,6 +506,7 @@ export default function DashboardPage() {
                     onChange={(e) =>
                       setEditData((prev) => ({ ...prev, item: e.target.value }))
                     }
+                    className="border-indigo-200 focus:border-indigo-500"
                   />
                   <datalist id="edit-expense-items">
                     {itemSuggestions.map((item) => (
@@ -515,7 +519,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {unitMode !== 'none' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       {unitMode === 'measure' ? 'Quantity' : 'Duration'}
                     </label>
                     <Input
@@ -525,12 +529,13 @@ export default function DashboardPage() {
                       onChange={(e) =>
                         setEditData((prev) => ({ ...prev, quantity: e.target.value }))
                       }
+                      className="border-indigo-200 focus:border-indigo-500"
                     />
                   </div>
                 )}
                 {unitMode !== 'none' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                       {unitMode === 'measure' ? 'Unit' : 'Period'}
                     </label>
                     <Select
@@ -539,7 +544,7 @@ export default function DashboardPage() {
                         setEditData((prev) => ({ ...prev, unit: value }))
                       }
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full border-indigo-200 focus:border-indigo-500">
                         <SelectValue placeholder="Unit" />
                       </SelectTrigger>
                       <SelectContent>
@@ -553,7 +558,7 @@ export default function DashboardPage() {
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Amount
                   </label>
                   <Input
@@ -563,13 +568,14 @@ export default function DashboardPage() {
                     onChange={(e) =>
                       setEditData((prev) => ({ ...prev, amount: e.target.value }))
                     }
+                    className="border-indigo-200 focus:border-indigo-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Currency
                   </label>
                   <Select
@@ -578,7 +584,7 @@ export default function DashboardPage() {
                       setEditData((prev) => ({ ...prev, currency: value }))
                     }
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full border-indigo-200 focus:border-indigo-500">
                       <SelectValue placeholder="Currency" />
                     </SelectTrigger>
                     <SelectContent>
@@ -591,7 +597,7 @@ export default function DashboardPage() {
                   </Select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Date
                   </label>
                   <Input
@@ -600,10 +606,11 @@ export default function DashboardPage() {
                     onChange={(e) =>
                       setEditData((prev) => ({ ...prev, date: e.target.value }))
                     }
+                    className="border-indigo-200 focus:border-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
                     Notes
                   </label>
                   <Input
@@ -612,19 +619,21 @@ export default function DashboardPage() {
                     onChange={(e) =>
                       setEditData((prev) => ({ ...prev, notes: e.target.value }))
                     }
+                    className="border-indigo-200 focus:border-indigo-500"
                   />
                 </div>
               </div>
 
               <div className="flex gap-3">
                 <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:opacity-90 text-white font-semibold"
                   onClick={handleSaveEdit}
                 >
                   Save Changes
                 </Button>
                 <Button
                   variant="outline"
+                  className="border-indigo-200 text-slate-700 hover:bg-indigo-50"
                   onClick={() => setEditingId(null)}
                 >
                   Cancel
@@ -634,23 +643,23 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        <Card className="p-6">
+        <Card className="p-6 bg-white/80 backdrop-blur border-indigo-100">
           <div className="flex flex-col gap-4 mb-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <h2 className="text-xl font-bold text-gray-900">Expenses</h2>
+              <h2 className="text-xl font-bold text-slate-900">Expenses</h2>
               <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
                 <Input
                   type="text"
                   placeholder="Search items, categories, notes"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="md:w-64"
+                  className="md:w-64 border-indigo-200 focus:border-indigo-500"
                 />
                 <Select
                   value={categoryFilter}
                   onValueChange={setCategoryFilter}
                 >
-                  <SelectTrigger className="md:w-56">
+                  <SelectTrigger className="md:w-56 border-indigo-200 focus:border-indigo-500">
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -663,7 +672,7 @@ export default function DashboardPage() {
                   </SelectContent>
                 </Select>
                 <Select value={monthFilter} onValueChange={setMonthFilter}>
-                  <SelectTrigger className="md:w-48">
+                  <SelectTrigger className="md:w-48 border-indigo-200 focus:border-indigo-500">
                     <SelectValue placeholder="All months" />
                   </SelectTrigger>
                   <SelectContent>
@@ -675,7 +684,7 @@ export default function DashboardPage() {
                   </SelectContent>
                 </Select>
                 <Select value={yearFilter} onValueChange={setYearFilter}>
-                  <SelectTrigger className="md:w-36">
+                  <SelectTrigger className="md:w-36 border-indigo-200 focus:border-indigo-500">
                     <SelectValue placeholder="All years" />
                   </SelectTrigger>
                   <SelectContent>
@@ -696,10 +705,10 @@ export default function DashboardPage() {
                   <button
                     key={label}
                     onClick={() => removeCustomCategory(label)}
-                    className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+                    className="inline-flex items-center gap-2 rounded-full border border-indigo-300 bg-indigo-50 px-3 py-1 text-sm text-indigo-700 hover:bg-indigo-100 transition"
                   >
                     <span>{label}</span>
-                    <span className="text-gray-400">✕</span>
+                    <span className="text-indigo-400">✕</span>
                   </button>
                 ))}
               </div>
@@ -710,53 +719,53 @@ export default function DashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Item</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Category</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Quantity</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Notes</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                  <tr className="border-b border-indigo-200 bg-gradient-to-r from-indigo-50/50 to-blue-50/50">
+                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Item</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Category</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Quantity</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Amount</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Date</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Notes</th>
+                    <th className="text-left py-3 px-4 font-semibold text-slate-700">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pagedExpenses.map((expense) => (
                     <tr
                       key={expense.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
+                      className="border-b border-indigo-100 hover:bg-indigo-50/30 transition"
                     >
-                      <td className="py-3 px-4 text-gray-900">
+                      <td className="py-3 px-4 text-slate-900 font-medium">
                         {expense.item}
                       </td>
-                      <td className="py-3 px-4 text-gray-600">
+                      <td className="py-3 px-4 text-slate-600">
                         {expense.category}
                       </td>
-                      <td className="py-3 px-4 text-gray-600">
+                      <td className="py-3 px-4 text-slate-600">
                         {expense.unit === 'item'
                           ? '-'
                           : `${expense.quantity} ${expense.unit}`}
                       </td>
-                      <td className="py-3 px-4 text-gray-900 font-semibold">
+                      <td className="py-3 px-4 text-slate-900 font-semibold text-indigo-600">
                         {expense.amount.toFixed(2)} {expense.currency}
                       </td>
-                      <td className="py-3 px-4 text-gray-600">
+                      <td className="py-3 px-4 text-slate-600">
                         {new Date(expense.date).toLocaleDateString()}
                       </td>
-                      <td className="py-3 px-4 text-gray-600">
+                      <td className="py-3 px-4 text-slate-600">
                         {expense.notes || '-'}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex gap-3">
                           <button
                             onClick={() => startEdit(expense)}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                            className="text-indigo-600 hover:text-indigo-700 hover:font-semibold text-sm font-medium transition"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(expense.id)}
-                            className="text-red-600 hover:text-red-700 text-sm font-medium"
+                            className="text-red-600 hover:text-red-700 hover:font-semibold text-sm font-medium transition"
                           >
                             Delete
                           </button>
@@ -768,12 +777,12 @@ export default function DashboardPage() {
               </table>
             </div>
           ) : (
-            <p className="text-gray-600">No expenses yet.</p>
+            <p className="text-slate-600 text-center py-8 font-medium">No expenses yet.</p>
           )}
 
           {filteredTableExpenses.length > 0 && (
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-4">
-              <p className="text-sm text-gray-600">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-6 pt-4 border-t border-indigo-100">
+              <p className="text-sm text-slate-600 font-medium">
                 Showing {(safePage - 1) * pageSize + 1}-
                 {Math.min(safePage * pageSize, filteredTableExpenses.length)} of
                 {' '}
@@ -782,16 +791,18 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
+                  className="border-indigo-200 text-slate-700 hover:bg-indigo-50"
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                   disabled={safePage === 1}
                 >
                   Previous
                 </Button>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm font-semibold text-slate-700 px-4 py-1 bg-indigo-50 rounded-md">
                   Page {safePage} of {totalPages}
                 </span>
                 <Button
                   variant="outline"
+                  className="border-indigo-200 text-slate-700 hover:bg-indigo-50"
                   onClick={() =>
                     setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                   }
