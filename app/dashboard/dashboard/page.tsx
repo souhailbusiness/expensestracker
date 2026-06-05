@@ -759,13 +759,13 @@ export default function DashboardPage() {
                         <div className="flex gap-3">
                           <button
                             onClick={() => startEdit(expense)}
-                            className="text-indigo-600 hover:text-indigo-700 hover:font-semibold text-sm font-medium transition"
+                            className="text-indigo-600 hover:text-indigo-700 hover:font-semibold text-sm font-medium transition cursor-pointer"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(expense.id)}
-                            className="text-red-600 hover:text-red-700 hover:font-semibold text-sm font-medium transition"
+                            className="text-red-600 hover:text-red-700 hover:font-semibold text-sm font-medium transition cursor-pointer"
                           >
                             Delete
                           </button>

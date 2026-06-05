@@ -302,17 +302,26 @@ export function useLocalExpenses() {
 
     if (!target) return;
 
+    // If expense has no serverId, it was created locally and never synced,
+    // so deletion is complete (no need to call server)
+    if (!target.serverId) {
+      console.log('[local-expenses] Deleted local-only expense:', id);
+      return;
+    }
+
     try {
-      const targetId = target.serverId || target.id;
-      const response = await fetch(`/api/expenses/${targetId}`, {
+      const response = await fetch(`/api/expenses/${target.serverId}`, {
         method: 'DELETE',
       });
 
-      // If server responded but deletion was not successful, restore state
-      if (!response.ok) {
+      // Treat both success (200) and not-found (404) as successful deletion.
+      // 404 means item already gone on server, so local deletion is sufficient.
+      if (!response.ok && response.status !== 404) {
         console.error('[local-expenses] API delete returned non-ok:', response.status);
         setExpenses(current);
         writeExpenses(current);
+      } else if (response.ok) {
+        console.log('[local-expenses] Expense deleted from server:', target.serverId);
       }
     } catch (error) {
       console.error('[local-expenses] API delete failed:', error);
