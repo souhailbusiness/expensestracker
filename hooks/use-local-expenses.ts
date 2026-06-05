@@ -304,9 +304,16 @@ export function useLocalExpenses() {
 
     try {
       const targetId = target.serverId || target.id;
-      await fetch(`/api/expenses/${targetId}`, {
+      const response = await fetch(`/api/expenses/${targetId}`, {
         method: 'DELETE',
       });
+
+      // If server responded but deletion was not successful, restore state
+      if (!response.ok) {
+        console.error('[local-expenses] API delete returned non-ok:', response.status);
+        setExpenses(current);
+        writeExpenses(current);
+      }
     } catch (error) {
       console.error('[local-expenses] API delete failed:', error);
       setExpenses(current);
