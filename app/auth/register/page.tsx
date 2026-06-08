@@ -102,7 +102,7 @@ export default function RegisterPage() {
 
           <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Creating...' : 'Create account'}
@@ -111,7 +111,7 @@ export default function RegisterPage() {
 
         <p className="text-sm text-gray-600 mt-6 text-center">
           Already have an account?{' '}
-          <Link className="text-blue-600 hover:text-blue-700" href="/auth/login">
+          <Link className="text-blue-600 hover:text-blue-700 cursor-pointer" href="/auth/login">
             Sign in
           </Link>
         </p>

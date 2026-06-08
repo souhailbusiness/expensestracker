@@ -63,18 +63,33 @@ export async function PUT(
   let sessionToken: string | null = null;
   let isNewSession = false;
   let isAnonymous = false;
+  let userId: string | undefined;
 
   try {
     const session = await getUserContext(request);
-    const userId = session.userId;
+    userId = session.userId;
     sessionToken = session.sessionToken;
     isNewSession = session.isNewSession;
     isAnonymous = session.isAnonymous;
+
+    if (!userId) {
+      console.error('[v0] PUT: No userId found in session');
+      const response = NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+      if (isAnonymous && isNewSession && sessionToken) {
+        attachSessionCookie(response, sessionToken);
+      }
+      return response;
+    }
 
     const body = await request.json();
     const validatedData = expenseSchema.parse(body);
 
     await connectToDatabase();
+
+    console.log('[v0] PUT expense:', params.id, 'for userId:', userId);
 
     const expense = await Expense.findOneAndUpdate(
       { _id: params.id, userId },
@@ -92,6 +107,7 @@ export async function PUT(
     );
 
     if (!expense) {
+      console.log('[v0] PUT: Expense not found:', params.id, 'userId:', userId);
       const response = NextResponse.json(
         { error: 'Expense not found' },
         { status: 404 }
@@ -102,6 +118,7 @@ export async function PUT(
       return response;
     }
 
+    console.log('[v0] PUT: Expense successfully updated:', params.id);
     const response = NextResponse.json({ expense }, { status: 200 });
     if (isAnonymous && isNewSession && sessionToken) {
       attachSessionCookie(response, sessionToken);
@@ -109,6 +126,7 @@ export async function PUT(
     return response;
   } catch (error: any) {
     console.error('[v0] Update expense error:', error);
+    console.error('[v0] Update error - userId:', userId, 'id:', params.id);
 
     if (error.name === 'ZodError') {
       const response = NextResponse.json(
@@ -139,15 +157,30 @@ export async function DELETE(
   let sessionToken: string | null = null;
   let isNewSession = false;
   let isAnonymous = false;
+  let userId: string | undefined;
 
   try {
     const session = await getUserContext(request);
-    const userId = session.userId;
+    userId = session.userId;
     sessionToken = session.sessionToken;
     isNewSession = session.isNewSession;
     isAnonymous = session.isAnonymous;
 
+    if (!userId) {
+      console.error('[v0] DELETE: No userId found in session');
+      const response = NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+      if (isAnonymous && isNewSession && sessionToken) {
+        attachSessionCookie(response, sessionToken);
+      }
+      return response;
+    }
+
     await connectToDatabase();
+
+    console.log('[v0] DELETE expense:', params.id, 'for userId:', userId);
 
     const expense = await Expense.findOneAndDelete({
       _id: params.id,
@@ -155,6 +188,7 @@ export async function DELETE(
     });
 
     if (!expense) {
+      console.log('[v0] DELETE: Expense not found:', params.id, 'userId:', userId);
       const response = NextResponse.json(
         { error: 'Expense not found' },
         { status: 404 }
@@ -165,6 +199,7 @@ export async function DELETE(
       return response;
     }
 
+    console.log('[v0] DELETE: Expense successfully deleted:', params.id);
     const response = NextResponse.json(
       { message: 'Expense deleted successfully' },
       { status: 200 }
@@ -175,6 +210,7 @@ export async function DELETE(
     return response;
   } catch (error) {
     console.error('[v0] Delete expense error:', error);
+    console.error('[v0] Delete error - userId:', userId, 'id:', params.id);
     const response = NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

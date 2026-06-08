@@ -104,7 +104,7 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Signing in...' : 'Sign in'}
@@ -120,7 +120,7 @@ export default function LoginPage() {
         <Button
           type="button"
           variant="outline"
-          className="w-full"
+          className="w-full cursor-pointer"
           onClick={handleGoogle}
           disabled={isSubmitting}
         >

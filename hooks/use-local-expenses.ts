@@ -118,6 +118,7 @@ export function useLocalExpenses() {
   const [currency, setCurrencyState] = useState('MAD');
   const [customCategories, setCustomCategories] = useState<string[]>([]);
   const hasMergedRef = useRef(false);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     setExpenses(readExpenses());
@@ -127,22 +128,34 @@ export function useLocalExpenses() {
 
   useEffect(() => {
     const loadFromServer = async () => {
+      if (hasLoadedRef.current) return;
+
       try {
         const response = await fetch('/api/expenses');
-        if (!response.ok) return;
+        if (!response.ok) {
+          console.warn('[local-expenses] Server load returned:', response.status);
+          return;
+        }
         const data = await response.json();
         const serverExpenses = Array.isArray(data?.expenses)
           ? data.expenses.map(normalizeServerExpense)
           : [];
-        setExpenses(serverExpenses);
-        writeExpenses(serverExpenses);
+
+        // Merge server expenses with local expenses that have serverId
+        const localExpensesWithoutServerId = readExpenses().filter((e) => !e.serverId);
+        const merged = [...serverExpenses, ...localExpensesWithoutServerId];
+
+        setExpenses(merged);
+        writeExpenses(merged);
+        hasLoadedRef.current = true;
       } catch (error) {
         console.error('[local-expenses] Load server data failed:', error);
+        hasLoadedRef.current = true;
       }
     };
 
     loadFromServer();
-  }, [status]);
+  }, []);
 
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
@@ -248,6 +261,10 @@ export function useLocalExpenses() {
       const updated = next.find((expense) => expense.id === id);
       if (!updated) return;
 
+      // Optimistically update UI and localStorage
+      setExpenses(next);
+      writeExpenses(next);
+
       try {
         const targetId = updated.serverId || updated.id;
         const response = await fetch(`/api/expenses/${targetId}`, {
@@ -266,7 +283,10 @@ export function useLocalExpenses() {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to update expense');
+          console.error('[local-expenses] API update failed with status:', response.status);
+          const errorData = await response.text();
+          console.error('[local-expenses] Error response:', errorData);
+          throw new Error(`API returned ${response.status}`);
         }
 
         const data = await response.json();
@@ -275,6 +295,7 @@ export function useLocalExpenses() {
           throw new Error('Invalid server response');
         }
 
+        // Update with server response to ensure sync
         const normalized = normalizeServerExpense(serverExpense);
         const refreshed = readExpenses().map((expense) =>
           expense.id === id || expense.serverId === normalized.serverId
@@ -283,10 +304,12 @@ export function useLocalExpenses() {
         );
         setExpenses(refreshed);
         writeExpenses(refreshed);
+        console.log('[local-expenses] Expense updated successfully:', id);
       } catch (error) {
         console.error('[local-expenses] API update failed:', error);
-        setExpenses(next);
-        writeExpenses(next);
+        // DON'T revert - keep optimistic update. User can manually refresh if needed
+        // setExpenses(current);
+        // writeExpenses(current);
       }
     },
     []
@@ -297,36 +320,50 @@ export function useLocalExpenses() {
     const target = current.find((expense) => expense.id === id);
     const next = current.filter((expense) => expense.id !== id);
 
+    // Optimistically remove from UI and localStorage
     setExpenses(next);
     writeExpenses(next);
+    console.log('[local-expenses] Deleted locally:', id, 'serverId:', target?.serverId);
 
     if (!target) return;
 
     // If expense has no serverId, it was created locally and never synced,
     // so deletion is complete (no need to call server)
     if (!target.serverId) {
-      console.log('[local-expenses] Deleted local-only expense:', id);
+      console.log('[local-expenses] Deleted local-only expense (no server sync needed):', id);
       return;
     }
 
     try {
+      console.log('[local-expenses] Calling DELETE API for serverId:', target.serverId);
       const response = await fetch(`/api/expenses/${target.serverId}`, {
         method: 'DELETE',
       });
 
+      console.log('[local-expenses] DELETE response status:', response.status);
+
       // Treat both success (200) and not-found (404) as successful deletion.
       // 404 means item already gone on server, so local deletion is sufficient.
       if (!response.ok && response.status !== 404) {
-        console.error('[local-expenses] API delete returned non-ok:', response.status);
-        setExpenses(current);
-        writeExpenses(current);
-      } else if (response.ok) {
-        console.log('[local-expenses] Expense deleted from server:', target.serverId);
+        const errorData = await response.text();
+        console.error('[local-expenses] DELETE failed with status:', response.status);
+        console.error('[local-expenses] DELETE error response:', errorData);
+        
+        // DON'T revert - keep the local deletion even if API fails
+        // The user's local state is the source of truth
+        console.warn('[local-expenses] Keeping local deletion despite API error');
+        return;
+      }
+
+      if (response.ok) {
+        console.log('[local-expenses] Expense successfully deleted from server:', target.serverId);
+      } else if (response.status === 404) {
+        console.log('[local-expenses] Expense already deleted on server (404):', target.serverId);
       }
     } catch (error) {
-      console.error('[local-expenses] API delete failed:', error);
-      setExpenses(current);
-      writeExpenses(current);
+      console.error('[local-expenses] DELETE API call failed:', error);
+      // DON'T revert - keep the local deletion
+      console.warn('[local-expenses] Keeping local deletion despite network error');
     }
   }, []);
 
@@ -348,17 +385,24 @@ export function useLocalExpenses() {
         });
         hasMergedRef.current = true;
 
+        // After merge, reload to sync any changes, but preserve current local state
         const response = await fetch('/api/expenses');
         if (response.ok) {
           const data = await response.json();
           const serverExpenses = Array.isArray(data?.expenses)
             ? data.expenses.map(normalizeServerExpense)
             : [];
-          setExpenses(serverExpenses);
-          writeExpenses(serverExpenses);
+          
+          // Merge server data with any local unsync'd changes
+          const currentLocal = readExpenses().filter((e) => !e.serverId);
+          const merged = [...serverExpenses, ...currentLocal];
+          
+          setExpenses(merged);
+          writeExpenses(merged);
         }
       } catch (error) {
         console.error('[local-expenses] Merge failed:', error);
+        hasMergedRef.current = true; // Don't retry on error
       }
     };
 
