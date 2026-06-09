@@ -91,22 +91,13 @@ export async function PUT(
 
     console.log('[v0] PUT expense:', params.id, 'for userId:', userId);
 
-    const expense = await Expense.findOneAndUpdate(
-      { _id: params.id, userId },
-      {
-        amount: validatedData.amount,
-        currency: validatedData.currency,
-        category: validatedData.category,
-        item: validatedData.item,
-        quantity: validatedData.quantity,
-        unit: validatedData.unit,
-        date: new Date(validatedData.date),
-        notes: validatedData.notes,
-      },
-      { new: true }
-    );
+    // Verify the expense exists first
+    const existingExpense = await Expense.findOne({
+      _id: params.id,
+      userId,
+    });
 
-    if (!expense) {
+    if (!existingExpense) {
       console.log('[v0] PUT: Expense not found:', params.id, 'userId:', userId);
       const response = NextResponse.json(
         { error: 'Expense not found' },
@@ -118,7 +109,37 @@ export async function PUT(
       return response;
     }
 
-    console.log('[v0] PUT: Expense successfully updated:', params.id);
+    // Update the expense
+    const updateData = {
+      amount: validatedData.amount,
+      currency: validatedData.currency,
+      category: validatedData.category,
+      item: validatedData.item,
+      quantity: validatedData.quantity,
+      unit: validatedData.unit,
+      date: new Date(validatedData.date),
+      notes: validatedData.notes,
+    };
+
+    const expense = await Expense.findOneAndUpdate(
+      { _id: params.id, userId },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!expense) {
+      console.log('[v0] PUT: Failed to update expense:', params.id);
+      const response = NextResponse.json(
+        { error: 'Failed to update expense' },
+        { status: 500 }
+      );
+      if (isAnonymous && isNewSession && sessionToken) {
+        attachSessionCookie(response, sessionToken);
+      }
+      return response;
+    }
+
+    console.log('[v0] PUT: Expense successfully updated:', params.id, 'new values:', updateData);
     const response = NextResponse.json({ expense }, { status: 200 });
     if (isAnonymous && isNewSession && sessionToken) {
       attachSessionCookie(response, sessionToken);
@@ -182,12 +203,13 @@ export async function DELETE(
 
     console.log('[v0] DELETE expense:', params.id, 'for userId:', userId);
 
-    const expense = await Expense.findOneAndDelete({
+    // Verify expense exists before deleting
+    const expenseToDelete = await Expense.findOne({
       _id: params.id,
       userId,
     });
 
-    if (!expense) {
+    if (!expenseToDelete) {
       console.log('[v0] DELETE: Expense not found:', params.id, 'userId:', userId);
       const response = NextResponse.json(
         { error: 'Expense not found' },
@@ -199,7 +221,25 @@ export async function DELETE(
       return response;
     }
 
-    console.log('[v0] DELETE: Expense successfully deleted:', params.id);
+    // Delete the expense and ensure it completes
+    const result = await Expense.deleteOne({
+      _id: params.id,
+      userId,
+    });
+
+    if (result.deletedCount === 0) {
+      console.log('[v0] DELETE: Failed to delete expense:', params.id);
+      const response = NextResponse.json(
+        { error: 'Failed to delete expense' },
+        { status: 500 }
+      );
+      if (isAnonymous && isNewSession && sessionToken) {
+        attachSessionCookie(response, sessionToken);
+      }
+      return response;
+    }
+
+    console.log('[v0] DELETE: Expense successfully deleted:', params.id, 'deletedCount:', result.deletedCount);
     const response = NextResponse.json(
       { message: 'Expense deleted successfully' },
       { status: 200 }
