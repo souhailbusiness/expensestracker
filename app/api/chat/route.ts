@@ -70,6 +70,10 @@ ${expenses
 Provide helpful budgeting advice and insights.`;
 
     const messages = [
+      {
+        role: 'system' as const,
+        content: systemMessage,
+      },
       ...chatHistory
         .reverse()
         .slice(-5)
@@ -84,17 +88,14 @@ Provide helpful budgeting advice and insights.`;
     ];
 
     // Call Groq API
-    const completion = await groq.messages.create({
+    const completion = await groq.chat.completions.create({
       model: 'mixtral-8x7b-32768',
       max_tokens: 1024,
-      system: systemMessage,
       messages,
     });
 
     const assistantMessage =
-      completion.content?.[0]?.type === 'text'
-        ? completion.content[0].text
-        : '';
+      completion.choices?.[0]?.message?.content || '';
 
     // Save assistant response
     const assistantResponse = new ChatHistory({

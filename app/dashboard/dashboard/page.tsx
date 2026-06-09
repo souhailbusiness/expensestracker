@@ -22,6 +22,7 @@ import {
   Tag,
   Utensils,
   Dumbbell,
+  MessageCircle,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,8 @@ import {
 } from '@/components/ui/select';
 import Link from 'next/link';
 import { useLocalExpenses } from '@/hooks/use-local-expenses';
+import { AIAssistantModal } from '@/components/ai-assistant-modal';
+import { EditExpenseModal } from '@/components/edit-expense-modal';
 
 const CATEGORIES = [
   {
@@ -239,6 +242,9 @@ export default function DashboardPage() {
   const [monthFilter, setMonthFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedExpenseForEdit, setSelectedExpenseForEdit] = useState<any>(null);
   const pageSize = 15;
   const [editData, setEditData] = useState({
     categoryId: CATEGORIES[0]?.id || 'fuel',
@@ -296,51 +302,16 @@ export default function DashboardPage() {
     'fuel';
 
   const startEdit = (expense: typeof expenses[number]) => {
-    setEditingId(expense.id);
-    setEditData({
-      categoryId: getCategoryIdByLabel(expense.category),
-      item: expense.item,
-      quantity: String(expense.quantity ?? 1),
-      unit: expense.unit || 'kg',
-      amount: String(expense.amount),
-      currency: expense.currency,
-      date: expense.date,
-      notes: expense.notes || '',
-    });
+    setSelectedExpenseForEdit(expense);
+    setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = async () => {
-    if (!editingId) return;
-    const amountValue = Number.parseFloat(editData.amount);
-    const quantityValue = Number.parseFloat(editData.quantity);
-    if (!Number.isFinite(amountValue) || amountValue <= 0) return;
-    if (unitMode === 'measure') {
-      if (!Number.isFinite(quantityValue) || quantityValue <= 0) return;
-    }
-
-    const categoryLabel = selectedCategory?.label || 'Other';
-    await updateExpense(editingId, {
-      amount: amountValue,
-      currency: editData.currency,
-      category: categoryLabel,
-      item: editData.item.trim(),
-      quantity:
-        unitMode === 'measure'
-          ? quantityValue
-          : Number.isFinite(quantityValue) && quantityValue > 0
-            ? quantityValue
-            : 1,
-      unit: unitMode === 'none' ? 'item' : editData.unit,
-      date: editData.date,
-      notes: editData.notes.trim() || undefined,
-    });
-
-    setEditingId(null);
+  const handleSaveEdit = async (id: string, updates: any) => {
+    await updateExpense(id, updates);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure?')) return;
-    if (editingId === id) setEditingId(null);
     await deleteExpense(id);
   };
 
@@ -814,6 +785,21 @@ export default function DashboardPage() {
             </div>
           )}
         </Card>
+
+        {/* Floating AI Assistant Button */}
+        <button
+          onClick={() => setIsAIModalOpen(true)}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 z-40"
+          title="Open AI Budget Assistant"
+        >
+          <MessageCircle className="w-6 h-6" />
+        </button>
+
+        {/* AI Assistant Modal */}
+        <AIAssistantModal 
+          isOpen={isAIModalOpen} 
+          onClose={() => setIsAIModalOpen(false)} 
+        />
       </div>
     </div>
   );
