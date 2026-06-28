@@ -275,9 +275,6 @@ export function useLocalExpenses() {
 
   const deleteExpense = useCallback(
     async (id: string) => {
-      // Optimistically remove from in-memory state
-      setExpenses((prev) => prev.filter((e) => e.id !== id));
-
       try {
         const target = expenses.find((e) => e.id === id);
         const targetId = target?.serverId || id;
@@ -286,19 +283,26 @@ export function useLocalExpenses() {
           method: 'DELETE',
         });
 
-        if (!response.ok && response.status !== 404) {
+        if (!response.ok) {
           const text = await response.text().catch(() => '');
           console.error('[local-expenses] deleteExpense API error:', response.status, text);
-          // Re-sync with server to restore authoritative state
-          await fetchExpensesFromServer();
-          return;
+          // If delete failed, don't remove from state
+          if (response.status !== 404) {
+            throw new Error('Failed to delete expense');
+          }
+          // If 404, expense is already gone, so continue
         }
 
-        // Refresh authoritative list from server
+        // Only remove from in-memory state after successful deletion
+        setExpenses((prev) => prev.filter((e) => e.id !== id));
+        
+        // Refresh authoritative list from server to ensure consistency
         await fetchExpensesFromServer();
       } catch (error) {
         console.error('[local-expenses] deleteExpense failed:', error);
+        // Re-sync with server to restore authoritative state in case of any error
         await fetchExpensesFromServer();
+        throw error;
       }
     },
     [expenses, fetchExpensesFromServer]
