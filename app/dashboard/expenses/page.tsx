@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useLocalExpenses } from '@/hooks/use-local-expenses';
+import { useExpenses } from '@/hooks/use-locale-expenses';
 
 const CATEGORIES = [
   {
@@ -203,14 +203,10 @@ function getCategoryConfig(categoryId: string) {
 }
 export default function ExpensesPage() {
   const router = useRouter();
-  const {
-    currency,
-    setCurrency,
-    addExpense,
-    customCategories,
-    addCustomCategory,
-  } = useLocalExpenses();
+  const { currency, setCurrency, addExpense } = useExpenses();
 
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [newCategory, setNewCategory] = useState('');
   const [formData, setFormData] = useState({
     amount: '',
     currency,
@@ -221,24 +217,21 @@ export default function ExpensesPage() {
     date: new Date().toISOString().split('T')[0],
     notes: '',
   });
-  const [newCategory, setNewCategory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setFormData((prev) => ({ ...prev, currency }));
   }, [currency]);
 
-  const categoryOptions = useMemo(() => {
-    const custom = customCategories.map((label) => ({
-      id: makeCategoryId(label),
-      label,
-      icon: Tag,
-      items: [] as string[],
-      unitMode: 'measure',
-      defaultUnit: 'kg',
-    }));
-    return [...custom, ...CATEGORIES];
-  }, [customCategories]);
+  const customCategoryObjects = customCategories.map((label) => ({
+    id: makeCategoryId(label),
+    label,
+    icon: Tag,
+    items: [] as string[],
+    unitMode: 'none' as const,
+  }));
+
+  const categoryOptions = [...CATEGORIES, ...customCategoryObjects];
 
   const selectedCategory = useMemo(
     () => categoryOptions.find((cat) => cat.id === formData.categoryId),
@@ -249,6 +242,17 @@ export default function ExpensesPage() {
   const unitOptions = unitMode === 'measure' ? MEASURE_UNITS : PERIOD_UNITS;
 
   const itemSuggestions = selectedCategory?.items || [];
+
+  const handleAddCategory = () => {
+    if (!newCategory.trim()) return;
+    const categoryLabel = newCategory.trim();
+    if (!customCategories.includes(categoryLabel)) {
+      setCustomCategories((prev) => [...prev, categoryLabel]);
+      const id = makeCategoryId(categoryLabel);
+      setFormData((prev) => ({ ...prev, categoryId: id }));
+      setNewCategory('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -285,13 +289,7 @@ export default function ExpensesPage() {
     router.push('/dashboard');
   };
 
-  const handleAddCategory = () => {
-    if (!newCategory.trim()) return;
-    addCustomCategory(newCategory);
-    const id = makeCategoryId(newCategory);
-    setFormData((prev) => ({ ...prev, categoryId: id }));
-    setNewCategory('');
-  };
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -345,6 +343,29 @@ export default function ExpensesPage() {
                     })}
                   </SelectContent>
                 </Select>
+                <div className="mt-3 flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Add custom category"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCategory();
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleAddCategory}
+                    variant="outline"
+                    className="whitespace-nowrap"
+                  >
+                    Add Category
+                  </Button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

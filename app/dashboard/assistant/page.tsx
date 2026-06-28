@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+ 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { useAuth } from '@/hooks/use-auth';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -12,6 +15,9 @@ interface ChatMessage {
 }
 
 export default function AssistantPage() {
+  
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -24,6 +30,19 @@ export default function AssistantPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    router.push('/login');
+    return null;
+  }
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -83,13 +102,19 @@ export default function AssistantPage() {
     }
   };
 
+  function t(arg0: string): import("react").ReactNode {
+    throw new Error('Function not implemented.');
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-4xl mx-auto h-[calc(100vh-100px)] flex flex-col">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">AI Budget Assistant</h1>
-          <p className="text-gray-600 mt-2">Ask questions about spending, savings, and budgets.</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Expense Tracker
+          </h1>
+          <p className="text-gray-600 mt-2">Expense Tracker</p>
         </div>
 
         {/* Chat Container */}
@@ -98,7 +123,7 @@ export default function AssistantPage() {
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <div className="text-4xl mb-4">🤖</div>
-                  <p className="text-gray-600">Start a conversation to get budget advice.</p>
+                <p className="text-gray-600">Expense Tracker</p>
               </div>
             </div>
           ) : (
@@ -140,7 +165,7 @@ export default function AssistantPage() {
               {isProcessing && (
                 <div className="flex justify-start">
                   <div className="bg-gray-200 text-gray-900 px-4 py-3 rounded-lg rounded-br-none">
-                    <p className="text-sm">Thinking...</p>
+                    <p className="text-sm">Expense Tracker</p>
                   </div>
                 </div>
               )}
@@ -154,7 +179,7 @@ export default function AssistantPage() {
           <div className="flex gap-3">
             <Input
               type="text"
-              placeholder="Ask about your spending or savings goals"
+              placeholder="Ask expense tracker..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -166,7 +191,7 @@ export default function AssistantPage() {
               disabled={isProcessing || !input.trim()}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {isProcessing ? '...' : 'Send Message'}
+              {isProcessing ? '...' : t('ai.sendMessage')}
             </Button>
           </div>
         </Card>
@@ -174,7 +199,7 @@ export default function AssistantPage() {
         {/* Tips */}
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>
-            Groq-powered budget guidance for your expenses, savings, and spending patterns.
+            Expense Tracker powered by Groq AI. Ask me about your budget, spending patterns, or savings strategies!
           </p>
         </div>
       </div>

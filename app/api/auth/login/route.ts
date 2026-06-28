@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import User from '@/lib/models/User';
-import { hashPassword, createSession } from '@/lib/auth';
+import { verifyPassword, createSession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,45 +17,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { message: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { message: 'Password must be at least 6 characters' },
-        { status: 400 }
-      );
-    }
-
     await connectToDatabase();
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
       return NextResponse.json(
-        { message: 'Email already registered' },
-        { status: 409 }
+        { message: 'Invalid email or password' },
+        { status: 401 }
       );
     }
 
-    // Hash password and create user
-    const hashedPassword = await hashPassword(password);
-    const user = new User({
-      email: email.toLowerCase(),
-      password: hashedPassword,
-    });
+    const passwordMatch = await verifyPassword(password, user.password);
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { message: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
 
-    await user.save();
-
-    // Create session
     const sessionToken = await createSession(user._id.toString());
-
     const response = NextResponse.json(
       {
         user: {
@@ -63,7 +43,7 @@ export async function POST(request: NextRequest) {
           email: user.email,
         },
       },
-      { status: 201 }
+      { status: 200 }
     );
 
     // Set session cookie
@@ -76,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Register error:', error);
+    console.error('Login error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

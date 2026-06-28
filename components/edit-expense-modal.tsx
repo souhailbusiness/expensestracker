@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -68,27 +68,26 @@ export function EditExpenseModal({
   const unitOptions = unitMode === 'measure' ? MEASURE_UNITS : PERIOD_UNITS;
   const itemSuggestions = selectedCategory?.items || [];
 
-  // Initialize form when expense or isOpen changes
-  const [isInitialized, setIsInitialized] = useState(false);
-  if (isOpen && expense && !isInitialized) {
-    const category = categoryOptions.find(
-      (cat) => cat.label === expense.category
-    );
-    setEditData({
-      categoryId: category?.id || categoryOptions[0]?.id || 'fuel',
-      item: expense.item || '',
-      quantity: String(expense.quantity ?? 1),
-      unit: expense.unit || 'kg',
-      amount: String(expense.amount || ''),
-      currency: expense.currency || 'MAD',
-      date: expense.date || new Date().toISOString().split('T')[0],
-      notes: expense.notes || '',
-    });
-    setIsInitialized(true);
-  }
+  // Initialize form when expense or isOpen changes - use useEffect to avoid render-time state updates
+  useEffect(() => {
+    if (isOpen && expense) {
+      const category = categoryOptions.find(
+        (cat) => cat.label === expense.category
+      );
+      setEditData({
+        categoryId: category?.id || categoryOptions[0]?.id || 'fuel',
+        item: expense.item || '',
+        quantity: String(expense.quantity ?? 1),
+        unit: expense.unit || 'kg',
+        amount: String(expense.amount || ''),
+        currency: expense.currency || 'MAD',
+        date: expense.date || new Date().toISOString().split('T')[0],
+        notes: expense.notes || '',
+      });
+    }
+  }, [isOpen, expense, categoryOptions]);
 
   const handleClose = () => {
-    setIsInitialized(false);
     onClose();
   };
 

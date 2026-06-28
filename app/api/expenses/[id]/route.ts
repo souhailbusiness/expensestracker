@@ -1,173 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Expense from '@/lib/models/Expense';
-import { attachSessionCookie } from '@/lib/anonymous-session';
-import { getUserContext } from '@/lib/auth-helpers';
-import { expenseSchema } from '@/lib/schemas';
+import { validateSession } from '@/lib/auth';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  let sessionToken: string | null = null;
-  let isNewSession = false;
-  let isAnonymous = false;
-
-  try {
-    const session = await getUserContext(request);
-    const userId = session.userId;
-    sessionToken = session.sessionToken;
-    isNewSession = session.isNewSession;
-    isAnonymous = session.isAnonymous;
-
-    await connectToDatabase();
-
-    const expense = await Expense.findOne({
-      _id: params.id,
-      userId,
-    });
-
-    if (!expense) {
-      const response = NextResponse.json(
-        { error: 'Expense not found' },
-        { status: 404 }
-      );
-      if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
-      }
-      return response;
-    }
-
-    const response = NextResponse.json({ expense }, { status: 200 });
-    if (isAnonymous && isNewSession && sessionToken) {
-      attachSessionCookie(response, sessionToken);
-    }
-    return response;
-  } catch (error) {
-    console.error('[v0] Get expense error:', error);
-    const response = NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-    if (isAnonymous && isNewSession && sessionToken) {
-      attachSessionCookie(response, sessionToken);
-    }
-    return response;
-  }
-}
+export const dynamic = 'error';
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  let sessionToken: string | null = null;
-  let isNewSession = false;
-  let isAnonymous = false;
-  let userId: string | undefined;
-
   try {
-    const session = await getUserContext(request);
-    userId = session.userId;
-    sessionToken = session.sessionToken;
-    isNewSession = session.isNewSession;
-    isAnonymous = session.isAnonymous;
+    const sessionToken = request.cookies.get('session')?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
 
+    const userId = await validateSession(sessionToken);
     if (!userId) {
-      console.error('[v0] PUT: No userId found in session');
-      const response = NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-      if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
-      }
-      return response;
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    const validatedData = expenseSchema.parse(body);
-
     await connectToDatabase();
 
-    console.log('[v0] PUT expense:', params.id, 'for userId:', userId);
-
-    // Verify the expense exists first
-    const existingExpense = await Expense.findOne({
-      _id: params.id,
-      userId,
-    });
-
-    if (!existingExpense) {
-      console.log('[v0] PUT: Expense not found:', params.id, 'userId:', userId);
-      const response = NextResponse.json(
-        { error: 'Expense not found' },
-        { status: 404 }
-      );
-      if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
-      }
-      return response;
-    }
-
-    // Update the expense
-    const updateData = {
-      amount: validatedData.amount,
-      currency: validatedData.currency,
-      category: validatedData.category,
-      item: validatedData.item,
-      quantity: validatedData.quantity,
-      unit: validatedData.unit,
-      date: new Date(validatedData.date),
-      notes: validatedData.notes,
-    };
-
-    const expense = await Expense.findOneAndUpdate(
-      { _id: params.id, userId },
-      updateData,
-      { new: true, runValidators: true }
-    );
-
+    // Verify expense belongs to user
+    const expense = await Expense.findOne({ _id: params.id, userId });
     if (!expense) {
-      console.log('[v0] PUT: Failed to update expense:', params.id);
-      const response = NextResponse.json(
-        { error: 'Failed to update expense' },
-        { status: 500 }
-      );
-      if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
-      }
-      return response;
+      return NextResponse.json({ message: 'Expense not found' }, { status: 404 });
     }
 
-    console.log('[v0] PUT: Expense successfully updated:', params.id, 'new values:', updateData);
-    const response = NextResponse.json({ expense }, { status: 200 });
-    if (isAnonymous && isNewSession && sessionToken) {
-      attachSessionCookie(response, sessionToken);
-    }
-    return response;
-  } catch (error: any) {
-    console.error('[v0] Update expense error:', error);
-    console.error('[v0] Update error - userId:', userId, 'id:', params.id);
+    // Update fields
+    if (body.amount !== undefined) expense.amount = body.amount;
+    if (body.currency !== undefined) expense.currency = body.currency;
+    if (body.category !== undefined) expense.category = body.category;
+    if (body.item !== undefined) expense.item = body.item;
+    if (body.quantity !== undefined) expense.quantity = body.quantity;
+    if (body.unit !== undefined) expense.unit = body.unit;
+    if (body.date !== undefined) expense.date = body.date;
+    if (body.notes !== undefined) expense.notes = body.notes;
 
-    if (error.name === 'ZodError') {
-      const response = NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
-        { status: 400 }
-      );
-      if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
-      }
-      return response;
-    }
+    await expense.save();
 
-    const response = NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-    if (isAnonymous && isNewSession && sessionToken) {
-      attachSessionCookie(response, sessionToken);
-    }
-    return response;
+    return NextResponse.json({ expense });
+  } catch (error) {
+    console.error('Update expense error:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -175,89 +52,30 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  let sessionToken: string | null = null;
-  let isNewSession = false;
-  let isAnonymous = false;
-  let userId: string | undefined;
-
   try {
-    const session = await getUserContext(request);
-    userId = session.userId;
-    sessionToken = session.sessionToken;
-    isNewSession = session.isNewSession;
-    isAnonymous = session.isAnonymous;
+    const sessionToken = request.cookies.get('session')?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
 
+    const userId = await validateSession(sessionToken);
     if (!userId) {
-      console.error('[v0] DELETE: No userId found in session');
-      const response = NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-      if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
-      }
-      return response;
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     await connectToDatabase();
 
-    console.log('[v0] DELETE expense:', params.id, 'for userId:', userId);
-
-    // Verify expense exists before deleting
-    const expenseToDelete = await Expense.findOne({
-      _id: params.id,
-      userId,
-    });
-
-    if (!expenseToDelete) {
-      console.log('[v0] DELETE: Expense not found:', params.id, 'userId:', userId);
-      const response = NextResponse.json(
-        { error: 'Expense not found' },
-        { status: 404 }
-      );
-      if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
-      }
-      return response;
+    // Verify expense belongs to user before deleting
+    const expense = await Expense.findOne({ _id: params.id, userId });
+    if (!expense) {
+      return NextResponse.json({ message: 'Expense not found' }, { status: 404 });
     }
 
-    // Delete the expense and ensure it completes
-    const result = await Expense.deleteOne({
-      _id: params.id,
-      userId,
-    });
+    await Expense.deleteOne({ _id: params.id, userId });
 
-    if (result.deletedCount === 0) {
-      console.log('[v0] DELETE: Failed to delete expense:', params.id);
-      const response = NextResponse.json(
-        { error: 'Failed to delete expense' },
-        { status: 500 }
-      );
-      if (isAnonymous && isNewSession && sessionToken) {
-        attachSessionCookie(response, sessionToken);
-      }
-      return response;
-    }
-
-    console.log('[v0] DELETE: Expense successfully deleted:', params.id, 'deletedCount:', result.deletedCount);
-    const response = NextResponse.json(
-      { message: 'Expense deleted successfully' },
-      { status: 200 }
-    );
-    if (isAnonymous && isNewSession && sessionToken) {
-      attachSessionCookie(response, sessionToken);
-    }
-    return response;
+    return NextResponse.json({ message: 'Expense deleted' });
   } catch (error) {
-    console.error('[v0] Delete expense error:', error);
-    console.error('[v0] Delete error - userId:', userId, 'id:', params.id);
-    const response = NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-    if (isAnonymous && isNewSession && sessionToken) {
-      attachSessionCookie(response, sessionToken);
-    }
-    return response;
+    console.error('Delete expense error:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

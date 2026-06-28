@@ -308,10 +308,11 @@ export default function DashboardPage() {
 
   const handleSaveEdit = async (id: string, updates: any) => {
     await updateExpense(id, updates);
+    setIsEditModalOpen(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure?')) return;
+    if (!confirm('Are you sure you want to delete this expense?')) return;
     await deleteExpense(id);
   };
 
@@ -417,6 +418,20 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-500 mb-6 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 inline-block">
             {otherCurrencyCount} expenses saved in other currencies are hidden.
           </p>
+        )}
+
+        {isEditModalOpen && selectedExpenseForEdit && (
+          <EditExpenseModal
+            isOpen={isEditModalOpen}
+            expense={selectedExpenseForEdit}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedExpenseForEdit(null);
+            }}
+            onSave={handleSaveEdit}
+            categories={categoryOptions}
+            currencies={CURRENCIES}
+          />
         )}
 
         {editingId && (
