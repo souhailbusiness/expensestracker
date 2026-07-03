@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import connectToDatabase from '@/lib/mongodb';
 import User from '@/lib/models/User';
 
-const providers = [
+const providers: any[] = [
   CredentialsProvider({
     name: 'credentials',
     credentials: {

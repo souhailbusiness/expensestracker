@@ -7,13 +7,14 @@ import { expenseSchema } from '@/lib/schemas';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   let sessionToken: string | null = null;
   let isNewSession = false;
   let isAnonymous = false;
 
   try {
+    const { id } = await params;
     const session = await getUserContext(request);
     const userId = session.userId;
     sessionToken = session.sessionToken;
@@ -23,7 +24,7 @@ export async function GET(
     await connectToDatabase();
 
     const expense = await Expense.findOne({
-      _id: params.id,
+      _id: id,
       userId,
     });
 
@@ -58,7 +59,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   let sessionToken: string | null = null;
   let isNewSession = false;
@@ -66,6 +67,7 @@ export async function PUT(
   let userId: string | undefined;
 
   try {
+    const { id } = await params;
     const session = await getUserContext(request);
     userId = session.userId;
     sessionToken = session.sessionToken;
@@ -89,16 +91,16 @@ export async function PUT(
 
     await connectToDatabase();
 
-    console.log('[v0] PUT expense:', params.id, 'for userId:', userId);
+    console.log('[v0] PUT expense:', id, 'for userId:', userId);
 
     // Verify the expense exists first
     const existingExpense = await Expense.findOne({
-      _id: params.id,
+      _id: id,
       userId,
     });
 
     if (!existingExpense) {
-      console.log('[v0] PUT: Expense not found:', params.id, 'userId:', userId);
+      console.log('[v0] PUT: Expense not found:', id, 'userId:', userId);
       const response = NextResponse.json(
         { error: 'Expense not found' },
         { status: 404 }
@@ -122,13 +124,13 @@ export async function PUT(
     };
 
     const expense = await Expense.findOneAndUpdate(
-      { _id: params.id, userId },
+      { _id: id, userId },
       updateData,
       { new: true, runValidators: true }
     );
 
     if (!expense) {
-      console.log('[v0] PUT: Failed to update expense:', params.id);
+      console.log('[v0] PUT: Failed to update expense:', id);
       const response = NextResponse.json(
         { error: 'Failed to update expense' },
         { status: 500 }
@@ -139,7 +141,7 @@ export async function PUT(
       return response;
     }
 
-    console.log('[v0] PUT: Expense successfully updated:', params.id, 'new values:', updateData);
+    console.log('[v0] PUT: Expense successfully updated:', id, 'new values:', updateData);
     const response = NextResponse.json({ expense }, { status: 200 });
     if (isAnonymous && isNewSession && sessionToken) {
       attachSessionCookie(response, sessionToken);
@@ -147,7 +149,7 @@ export async function PUT(
     return response;
   } catch (error: any) {
     console.error('[v0] Update expense error:', error);
-    console.error('[v0] Update error - userId:', userId, 'id:', params.id);
+    console.error('[v0] Update error - userId:', userId);
 
     if (error.name === 'ZodError') {
       const response = NextResponse.json(
@@ -173,7 +175,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   let sessionToken: string | null = null;
   let isNewSession = false;
@@ -181,6 +183,7 @@ export async function DELETE(
   let userId: string | undefined;
 
   try {
+    const { id } = await params;
     const session = await getUserContext(request);
     userId = session.userId;
     sessionToken = session.sessionToken;
@@ -201,16 +204,16 @@ export async function DELETE(
 
     await connectToDatabase();
 
-    console.log('[v0] DELETE expense:', params.id, 'for userId:', userId);
+    console.log('[v0] DELETE expense:', id, 'for userId:', userId);
 
     // Verify expense exists before deleting
     const expenseToDelete = await Expense.findOne({
-      _id: params.id,
+      _id: id,
       userId,
     });
 
     if (!expenseToDelete) {
-      console.log('[v0] DELETE: Expense not found:', params.id, 'userId:', userId);
+      console.log('[v0] DELETE: Expense not found:', id, 'userId:', userId);
       const response = NextResponse.json(
         { error: 'Expense not found' },
         { status: 404 }
@@ -223,12 +226,12 @@ export async function DELETE(
 
     // Delete the expense and ensure it completes
     const result = await Expense.deleteOne({
-      _id: params.id,
+      _id: id,
       userId,
     });
 
     if (result.deletedCount === 0) {
-      console.log('[v0] DELETE: Failed to delete expense:', params.id);
+      console.log('[v0] DELETE: Failed to delete expense:', id);
       const response = NextResponse.json(
         { error: 'Failed to delete expense' },
         { status: 500 }
@@ -239,7 +242,7 @@ export async function DELETE(
       return response;
     }
 
-    console.log('[v0] DELETE: Expense successfully deleted:', params.id, 'deletedCount:', result.deletedCount);
+    console.log('[v0] DELETE: Expense successfully deleted:', id, 'deletedCount:', result.deletedCount);
     const response = NextResponse.json(
       { message: 'Expense deleted successfully' },
       { status: 200 }
@@ -250,7 +253,7 @@ export async function DELETE(
     return response;
   } catch (error) {
     console.error('[v0] Delete expense error:', error);
-    console.error('[v0] Delete error - userId:', userId, 'id:', params.id);
+    console.error('[v0] Delete error - userId:', userId);
     const response = NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

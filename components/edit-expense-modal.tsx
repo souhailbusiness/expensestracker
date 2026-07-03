@@ -188,7 +188,7 @@ export function EditExpenseModal({
                 className="border-indigo-200 focus:border-indigo-500"
               />
               <datalist id="edit-modal-items">
-                {itemSuggestions.map((item) => (
+                {itemSuggestions.map((item: string) => (
                   <option key={item} value={item} />
                 ))}
               </datalist>

@@ -236,7 +236,6 @@ export default function DashboardPage() {
   const otherCurrencyCount = expenses.filter(
     (exp) => exp.currency !== currency
   ).length;
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [monthFilter, setMonthFilter] = useState('all');
@@ -246,16 +245,6 @@ export default function DashboardPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedExpenseForEdit, setSelectedExpenseForEdit] = useState<any>(null);
   const pageSize = 15;
-  const [editData, setEditData] = useState({
-    categoryId: CATEGORIES[0]?.id || 'fuel',
-    item: '',
-    quantity: '1',
-    unit: 'kg',
-    amount: '',
-    currency,
-    date: new Date().toISOString().split('T')[0],
-    notes: '',
-  });
 
   const categoryOptions = useMemo(() => {
     const custom = customCategories.map((label) => ({
@@ -268,11 +257,6 @@ export default function DashboardPage() {
     }));
     return [...custom, ...CATEGORIES];
   }, [customCategories]);
-
-  const selectedCategory = useMemo(
-    () => categoryOptions.find((cat) => cat.id === editData.categoryId),
-    [categoryOptions, editData.categoryId]
-  );
 
   const filterCategoryOptions = useMemo(
     () => categoryOptions.map((category) => category.label),
@@ -290,11 +274,6 @@ export default function DashboardPage() {
     years.add(new Date().getFullYear());
     return Array.from(years).sort((a, b) => b - a);
   }, [filteredExpenses]);
-
-  const unitMode = selectedCategory?.unitMode || 'none';
-  const unitOptions = unitMode === 'measure' ? MEASURE_UNITS : PERIOD_UNITS;
-
-  const itemSuggestions = selectedCategory?.items || [];
 
   const getCategoryIdByLabel = (label: string) =>
     categoryOptions.find((category) => category.label === label)?.id ||
@@ -432,201 +411,6 @@ export default function DashboardPage() {
             categories={categoryOptions}
             currencies={CURRENCIES}
           />
-        )}
-
-        {editingId && (
-          <Card className="p-6 mb-8 bg-white/80 backdrop-blur border-indigo-100">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            </h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Category
-                  </label>
-                  <Select
-                    value={editData.categoryId}
-                    onValueChange={(value) => {
-                      const config = CATEGORIES.find((cat) => cat.id === value);
-                      const mode = config?.unitMode || 'measure';
-                      const nextUnit =
-                        mode === 'period'
-                          ? config?.defaultUnit || 'month'
-                          : mode === 'none'
-                            ? 'item'
-                            : config?.defaultUnit || 'kg';
-                      setEditData((prev) => ({
-                        ...prev,
-                        categoryId: value,
-                        unit: nextUnit,
-                        quantity: '1',
-                      }));
-                    }}
-                  >
-                    <SelectTrigger className="w-full border-indigo-200 focus:border-indigo-500">
-                      <SelectValue placeholder="Pick a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categoryOptions.map((category) => {
-                        const Icon = category.icon;
-                        return (
-                          <SelectItem key={category.id} value={category.id}>
-                            <span className="flex items-center gap-2">
-                              <Icon className="size-4" />
-                              <span>{category.label}</span>
-                            </span>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Item
-                  </label>
-                  <Input
-                    type="text"
-                    list="edit-expense-items"
-                    value={editData.item}
-                    onChange={(e) =>
-                      setEditData((prev) => ({ ...prev, item: e.target.value }))
-                    }
-                    className="border-indigo-200 focus:border-indigo-500"
-                  />
-                  <datalist id="edit-expense-items">
-                    {itemSuggestions.map((item) => (
-                      <option key={item} value={item} />
-                    ))}
-                  </datalist>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {unitMode !== 'none' && (
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      {unitMode === 'measure' ? 'Quantity' : 'Duration'}
-                    </label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={editData.quantity}
-                      onChange={(e) =>
-                        setEditData((prev) => ({ ...prev, quantity: e.target.value }))
-                      }
-                      className="border-indigo-200 focus:border-indigo-500"
-                    />
-                  </div>
-                )}
-                {unitMode !== 'none' && (
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      {unitMode === 'measure' ? 'Unit' : 'Period'}
-                    </label>
-                    <Select
-                      value={editData.unit}
-                      onValueChange={(value) =>
-                        setEditData((prev) => ({ ...prev, unit: value }))
-                      }
-                    >
-                      <SelectTrigger className="w-full border-indigo-200 focus:border-indigo-500">
-                        <SelectValue placeholder="Unit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {unitOptions.map((unit) => (
-                          <SelectItem key={unit.value} value={unit.value}>
-                            {unit.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Amount
-                  </label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={editData.amount}
-                    onChange={(e) =>
-                      setEditData((prev) => ({ ...prev, amount: e.target.value }))
-                    }
-                    className="border-indigo-200 focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Currency
-                  </label>
-                  <Select
-                    value={editData.currency}
-                    onValueChange={(value) =>
-                      setEditData((prev) => ({ ...prev, currency: value }))
-                    }
-                  >
-                    <SelectTrigger className="w-full border-indigo-200 focus:border-indigo-500">
-                      <SelectValue placeholder="Currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CURRENCIES.map((code) => (
-                        <SelectItem key={code} value={code}>
-                          {code}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={editData.date}
-                    onChange={(e) =>
-                      setEditData((prev) => ({ ...prev, date: e.target.value }))
-                    }
-                    className="border-indigo-200 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Notes
-                  </label>
-                  <Input
-                    type="text"
-                    value={editData.notes}
-                    onChange={(e) =>
-                      setEditData((prev) => ({ ...prev, notes: e.target.value }))
-                    }
-                    className="border-indigo-200 focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  className="bg-gradient-to-r from-indigo-500 to-blue-600 hover:opacity-90 text-white font-semibold"
-                  onClick={handleSaveEdit}
-                >
-                  Save Changes
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-indigo-200 text-slate-700 hover:bg-indigo-50"
-                  onClick={() => setEditingId(null)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </Card>
         )}
 
         <Card className="p-6 bg-white/80 backdrop-blur border-indigo-100">

@@ -7,13 +7,14 @@ import { categorySchema } from '@/lib/schemas';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   let sessionToken: string | null = null;
   let isNewSession = false;
   let isAnonymous = false;
 
   try {
+    const { id } = await params;
     const session = await getUserContext(request);
     const userId = session.userId;
     sessionToken = session.sessionToken;
@@ -26,7 +27,7 @@ export async function PUT(
     await connectToDatabase();
 
     const category = await Category.findOneAndUpdate(
-      { _id: params.id, userId },
+      { _id: id, userId },
       {
         name: validatedData.name,
         budget: validatedData.budget,
@@ -78,13 +79,14 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   let sessionToken: string | null = null;
   let isNewSession = false;
   let isAnonymous = false;
 
   try {
+    const { id } = await params;
     const session = await getUserContext(request);
     const userId = session.userId;
     sessionToken = session.sessionToken;
@@ -94,7 +96,7 @@ export async function DELETE(
     await connectToDatabase();
 
     const category = await Category.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       userId,
     });
 
