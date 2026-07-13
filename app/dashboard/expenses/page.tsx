@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useExpenses } from '@/hooks/use-locale-expenses';
+import { useExpenses } from '@/hooks/use-local-expenses';
 
 const CATEGORIES = [
   {

@@ -1,6 +1,10 @@
+import type { NextAuthOptions } from 'next-auth';
 import bcrypt from 'bcryptjs';
-import connectToDatabase from '@/lib/mongodb';
-import User from '@/lib/models/User';
+
+export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
+  providers: [],
+};
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10);
