@@ -11,105 +11,115 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
       await logout();
+      setIsAccountMenuOpen(false);
       router.push('/auth/login');
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
   const navItems = [
-    { label: 'Dashboard', href: '/dashboard', icon: '📊' },
-    { label: 'Purchases', href: '/dashboard/purchases', icon: '🛒' },
+    { label: 'Home', href: '/', icon: '🏠' },
+    { label: 'Blog', href: '/blogs', icon: '📝' },
+    { label: 'About', href: '/about', icon: 'ℹ️' },
+    { label: 'Contact', href: '/contact', icon: '📞' },
+    { label: 'Privacy', href: '/privacy', icon: '🔒' },
   ];
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="text-2xl">💰</div>
-            <span className="text-xl font-bold text-gray-900 hidden sm:inline">
-              Expense Tracker
-            </span>
-          </Link>
+    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href={isAuthenticated ? '/dashboard' : '/'} className="flex items-center gap-2">
+          <div className="text-2xl">💰</div>
+          <span className="hidden text-xl font-bold text-slate-900 sm:inline">Expense Tracker</span>
+        </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex gap-1">
-            {navItems.map((item) => {
-              const isActive = pathname.includes(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <span className="mr-1">{item.icon}</span>
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:block text-sm">
-              <p className="text-gray-900 font-medium">{user?.email}</p>
-            </div>
-            <Button
-              onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white text-sm"
-            >
-              Logout
-            </Button>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        <div className="hidden items-center gap-1 md:flex">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-slate-700 hover:bg-slate-100'
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-          </div>
+                <span className="mr-1">{item.icon}</span>
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+        <div className="flex items-center gap-3">
+          {isAuthenticated ? (
+            <div className="relative">
+              <button
+                onClick={() => setIsAccountMenuOpen((prev) => !prev)}
+                className="rounded-full border border-indigo-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-400 hover:text-indigo-700"
+              >
+                {user?.email ? user.email.split('@')[0] : 'Account'}
+              </button>
+
+              {isAccountMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+                  <Link
+                    href="/dashboard"
+                    className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="mt-1 block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-300 ease-in-out hover:opacity-90"
+            >
+              Sign In
+            </Link>
+          )}
+
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="rounded-md p-2 text-slate-700 hover:bg-slate-100 md:hidden"
+          >
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {isMobileMenuOpen && (
+        <div className="border-t border-slate-200 bg-white px-4 py-3 md:hidden">
+          <div className="flex flex-col gap-2">
             {navItems.map((item) => {
-              const isActive = pathname.includes(item.href);
+              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
                     isActive
                       ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      : 'text-slate-700 hover:bg-slate-100'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -118,9 +128,35 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-md px-3 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="rounded-md bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-3 py-2 text-center text-sm font-semibold text-white"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 }
