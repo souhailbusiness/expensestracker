@@ -8,15 +8,15 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleLogin = async (event: React.FormEvent) => {
+  const handleRegister = async (event: React.FormEvent) => {
     event.preventDefault();
     if (isSubmitting) return;
 
@@ -24,7 +24,7 @@ export default function LoginPage() {
     setErrorMessage('');
 
     try {
-      await login(email, password);
+      await register(email, password);
       router.push('/dashboard');
     } catch (err: any) {
       setErrorMessage(err.message || 'Invalid email or password');
@@ -35,12 +35,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8 flex items-center justify-center">
       <Card className="w-full max-w-md p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Create account</h1>
         <p className="text-sm text-gray-600 mb-6">
-          Enter your email and password to sign in.
+          Create your account to access a personalized dashboard.
         </p>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Email
@@ -75,17 +75,17 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+            className="w-full bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 text-white cursor-pointer"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {isSubmitting ? 'Creating account...' : 'Create account'}
           </Button>
         </form>
 
         <p className="text-sm text-gray-600 mt-6 text-center">
-          No account yet?{' '}
-          <Link className="text-blue-600 hover:text-blue-700" href="/auth/register">
-            Create one
+          Already have an account?{' '}
+          <Link className="text-blue-600 hover:text-blue-700" href="/auth/login">
+            Sign in
           </Link>
         </p>
       </Card>

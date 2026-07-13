@@ -1,7 +1,7 @@
  'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/use-auth';
 
 export interface LocalExpense {
   id: string;
@@ -112,8 +112,7 @@ function toIsoDate(date: string | Date | undefined) {
 }
 
 export function useLocalExpenses() {
-  const session = useSession();
-  const status = session?.status ?? 'unauthenticated';
+  const { isAuthenticated, isLoading } = useAuth();
   const [expenses, setExpenses] = useState<LocalExpense[]>([]);
   const [currency, setCurrencyState] = useState('MAD');
   const [customCategories, setCustomCategories] = useState<string[]>([]);
@@ -125,6 +124,11 @@ export function useLocalExpenses() {
   }, []);
 
   const fetchExpensesFromServer = useCallback(async () => {
+    if (!isAuthenticated) {
+      setExpenses([]);
+      return;
+    }
+
     try {
       const response = await fetch('/api/expenses', { cache: 'no-store' });
       if (!response.ok) {
@@ -144,11 +148,13 @@ export function useLocalExpenses() {
     } catch (error) {
       console.error('[local-expenses] fetchExpensesFromServer failed:', error);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    void fetchExpensesFromServer();
-  }, [status, fetchExpensesFromServer]);
+    if (!isLoading) {
+      void fetchExpensesFromServer();
+    }
+  }, [isAuthenticated, isLoading, fetchExpensesFromServer]);
 
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
@@ -221,14 +227,17 @@ export function useLocalExpenses() {
       const createdExpense = serverExpense ? normalizeServerExpense(serverExpense) : undefined;
 
       if (createdExpense) {
-        setExpenses((prev) => [createdExpense, ...prev]);
-        writeExpenses([createdExpense, ...expenses]);
+        setExpenses((prev) => {
+          const next = [createdExpense, ...prev];
+          writeExpenses(next);
+          return next;
+        });
       }
 
       await fetchExpensesFromServer();
       return createdExpense;
     },
-    [expenses, fetchExpensesFromServer]
+    [fetchExpensesFromServer]
   );
 
   const updateExpense = useCallback(
@@ -279,8 +288,12 @@ export function useLocalExpenses() {
         throw new Error('Failed to delete expense');
       }
 
-      setExpenses((prev) => prev.filter((expense) => expense.id !== id));
-      writeExpenses(expenses.filter((expense) => expense.id !== id));
+      setExpenses((prev) => {
+        const next = prev.filter((expense) => expense.id !== id);
+        writeExpenses(next);
+        return next;
+      });
+
       await fetchExpensesFromServer();
     },
     [expenses, fetchExpensesFromServer]

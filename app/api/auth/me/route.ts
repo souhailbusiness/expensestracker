@@ -1,7 +1,9 @@
-{/*import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { validateSession } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,4 +38,4 @@ export async function GET(request: NextRequest) {
     console.error('Get user error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
-}*/}
+}

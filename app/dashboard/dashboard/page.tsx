@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/select';
 import Link from 'next/link';
 import { useLocalExpenses } from '@/hooks/use-local-expenses';
+import { useAuth } from '@/hooks/use-auth';
 import { AIAssistantModal } from '@/components/ai-assistant-modal';
 import { EditExpenseModal } from '@/components/edit-expense-modal';
 
@@ -217,6 +218,7 @@ function makeCategoryId(label: string) {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const {
     expenses,
     currency,
@@ -375,7 +377,7 @@ export default function DashboardPage() {
               Expense Tracker
             </h1>
             <p className="text-slate-600 mt-1">
-              Expense Tracker Overview ({currency})
+              Welcome back, {user?.email ?? 'your account'}. Your personal expense dashboard is ready.
             </p>
           </div>
           <div className="flex gap-4">

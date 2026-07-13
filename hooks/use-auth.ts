@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface User {
   id: string;
@@ -12,21 +12,31 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
-      // Check if session exists by attempting to fetch expenses
-      const res = await fetch('/api/expenses');
-      setIsAuthenticated(res.ok);
+      const res = await fetch('/api/auth/me', { cache: 'no-store' });
+
+      if (!res.ok) {
+        setUser(null);
+        setIsAuthenticated(false);
+        return;
+      }
+
+      const data = await res.json();
+      setUser(data.user ?? null);
+      setIsAuthenticated(Boolean(data.user));
     } catch (error) {
+      console.error('Auth check failed:', error);
+      setUser(null);
       setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void checkAuth();
+  }, [checkAuth]);
 
   const login = async (email: string, password: string) => {
     const res = await fetch('/api/auth/login', {
