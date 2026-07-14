@@ -151,13 +151,15 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <button
-                className="rounded-md bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-3 py-2 text-center text-sm font-semibold text-white"
-                onClick={() => setIsAuthModalOpen(true)}
-              >
-                Sign In
-              </button>
-              <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+              <>
+                <button
+                  className="rounded-md bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-3 py-2 text-center text-sm font-semibold text-white"
+                  onClick={() => setIsAuthModalOpen(true)}
+                >
+                  Sign In
+                </button>
+                <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+              </>
             )}
           </div>
         </div>
