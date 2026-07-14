@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
+import AuthModal from '@/components/auth-modal';
 
 export default function Navbar() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -88,12 +90,15 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <Link
-              href="/auth/login"
-              className="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-300 ease-in-out hover:opacity-90"
-            >
-              Sign In
-            </Link>
+            <>
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-300 ease-in-out hover:opacity-90"
+              >
+                Sign In
+              </button>
+              <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+            </>
           )}
 
           <button
@@ -146,13 +151,13 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <Link
-                href="/auth/login"
+              <button
                 className="rounded-md bg-gradient-to-r from-indigo-500 via-blue-600 to-purple-600 px-3 py-2 text-center text-sm font-semibold text-white"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => setIsAuthModalOpen(true)}
               >
                 Sign In
-              </Link>
+              </button>
+              <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
             )}
           </div>
         </div>
